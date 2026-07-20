@@ -7,6 +7,24 @@ try {
 } catch (Throwable $erro) {
     exit('Não foi possível conectar ao Redis. Verifique a conexão.');
 }
+<div class="painel">
+<div class="indicador">
+<strong><?= $totalVotos ?></strong>
+<span>votos</span>
+</div>
+<div class="indicador">
+<strong><?= $totalParticipantes ?></strong>
+<span>participantes</span>
+</div>
+<div class="indicador">
+<strong><?= $totalOpcoes ?></strong>
+<span>opções</span>
+</div>
+<div class="indicador">
+<strong><?= $totalHistorico ?></strong>
+<span>itens no histórico</span>
+</div>
+</div>
 $opcoesPermitidas = [
     'MySQL',
     'MongoDB',
@@ -115,6 +133,13 @@ $mensagem = $mensagens[$status] ?? '';
         </section>
         <section class="cartao">
             <h2>Ranking atual</h2>
+            <?php if ($nomeLider !== null && $votosLider > 0): ?>
+                <p class="lider">
+                    Líder atual:
+                    <strong><?= htmlspecialchars($nomeLider) ?></strong>
+                    com <?= $votosLider ?> voto(s).
+                </p>
+            <?php endif; ?>
             <section class="cartao">
                 <h2>Últimos votos</h2>
                 <?php if ($historico === []): ?>
@@ -135,6 +160,22 @@ $mensagem = $mensagens[$status] ?? '';
             0,
             9
             );
+            $totalParticipantes = (int) $redis->scard(
+            'votacao:participantes'
+            );
+            $totalOpcoes = (int) $redis->zcard(
+            'votacao:bancos'
+            );
+            $totalHistorico = (int) $redis->llen(
+            'votacao:historico'
+            );
+            $nomeLider = null;
+            $votosLider = 0;
+            foreach ($ranking as $banco => $votos) {
+            $nomeLider = (string) $banco;
+            $votosLider = (int) $votos;
+            break;
+            }
             <label for="participante">
                 Código do participante
             </label>
