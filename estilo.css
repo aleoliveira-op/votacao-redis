@@ -112,12 +112,16 @@ td {
     font-size: 1rem;
 }
 
-.historico {
-    padding-left: 22px;
+.tempo {
+    padding: 10px 12px;
+    border-left: 4px solid #1261a0;
+    background: #eef7ff;
 }
 
-.historico li {
-    margin-bottom: 8px;
+.encerrada {
+    padding: 12px;
+    border-radius: 8px;
+    background: #fff1f1;
 }
 
 .lider {
@@ -148,6 +152,14 @@ td {
 .indicador span {
     font-size: 0.85rem;
     color: #555f6b;
+}
+
+.historico {
+    padding-left: 22px;
+}
+
+.historico li {
+    margin-bottom: 8px;
 }
 
 @media (max-width: 700px) {
