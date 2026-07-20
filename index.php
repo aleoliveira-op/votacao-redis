@@ -25,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'votacao:bancos',
             'votacao:total',
             'votacao:participantes',
+            'votacao:historico',
         ]);
         header('Location: index.php?status=zerada');
         exit;
@@ -62,6 +63,16 @@ $ranking = $redis->zrange(
     ]
 );
 $totalVotos = (int) ($redis->get('votacao:total') ?? 0);
+$registro = "{$participante} votou em {$opcao}";
+$redis->lpush(
+    'votacao:historico',
+    $registro
+);
+$redis->ltrim(
+    'votacao:historico',
+    0,
+    9
+);
 $status = $_GET['status'] ?? '';
 $mensagens = [
     'registrado' => 'Voto registrado com sucesso!',
@@ -104,7 +115,26 @@ $mensagem = $mensagens[$status] ?? '';
         </section>
         <section class="cartao">
             <h2>Ranking atual</h2>
+            <section class="cartao">
+                <h2>Últimos votos</h2>
+                <?php if ($historico === []): ?>
+                    <p>Nenhum voto foi registrado.</p>
+                <?php else: ?>
+                    <ol class="historico">
+                        <?php foreach ($historico as $registro): ?>
+                            <li>
+                                <?= htmlspecialchars((string) $registro) ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ol>
+                <?php endif; ?>
+            </section>
             <p class="total">Total de votos: <?= $totalVotos ?></p>
+            $historico = $redis->lrange(
+            'votacao:historico',
+            0,
+            9
+            );
             <label for="participante">
                 Código do participante
             </label>
