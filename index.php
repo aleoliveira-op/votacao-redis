@@ -7,24 +7,6 @@ try {
 } catch (Throwable $erro) {
     exit('Não foi possível conectar ao Redis. Verifique a conexão.');
 }
-<div class="painel">
-<div class="indicador">
-<strong><?= $totalVotos ?></strong>
-<span>votos</span>
-</div>
-<div class="indicador">
-<strong><?= $totalParticipantes ?></strong>
-<span>participantes</span>
-</div>
-<div class="indicador">
-<strong><?= $totalOpcoes ?></strong>
-<span>opções</span>
-</div>
-<div class="indicador">
-<strong><?= $totalHistorico ?></strong>
-<span>itens no histórico</span>
-</div>
-</div>
 $opcoesPermitidas = [
     'MySQL',
     'MongoDB',
