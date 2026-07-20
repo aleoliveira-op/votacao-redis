@@ -21,13 +21,30 @@ if (!$redis->exists('votacao:bancos')) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $acao = $_POST['acao'] ?? 'votar';
     if ($acao === 'zerar') {
-        $redis->del(['votacao:bancos', 'votacao:total']);
+        $redis->del([
+            'votacao:bancos',
+            'votacao:total',
+            'votacao:participantes',
+        ]);
         header('Location: index.php?status=zerada');
         exit;
     }
     $opcao = trim($_POST['opcao'] ?? '');
+    $participante = strtolower(trim($_POST['participante'] ?? ''));
     if (!in_array($opcao, $opcoesPermitidas, true)) {
         header('Location: index.php?status=invalida');
+        exit;
+    }
+    if (!preg_match('/^[a-z0-9._-]{3,30}$/', $participante)) {
+        header('Location: index.php?status=participante-invalido');
+        exit;
+    }
+    $novoParticipante = (int) $redis->sadd(
+        'votacao:participantes',
+        $participante
+    );
+    if ($novoParticipante === 0) {
+        header('Location: index.php?status=duplicado');
         exit;
     }
     $redis->zincrby('votacao:bancos', 1, $opcao);
@@ -50,6 +67,8 @@ $mensagens = [
     'registrado' => 'Voto registrado com sucesso!',
     'invalida' => 'Selecione uma opção válida.',
     'zerada' => 'A votação foi zerada.',
+    'participante-invalido' => 'Informe um código de participante válido.',
+    'duplicado' => 'Este participante já registrou um voto.',
 ];
 $mensagem = $mensagens[$status] ?? '';
 ?>
@@ -86,6 +105,11 @@ $mensagem = $mensagens[$status] ?? '';
         <section class="cartao">
             <h2>Ranking atual</h2>
             <p class="total">Total de votos: <?= $totalVotos ?></p>
+            <label for="participante">
+                Código do participante
+            </label>
+            <input class="campo-texto" type="text" id="participante" name="participante" minlength="3" maxlength="30"
+                pattern="[A-Za-z0-9._-]{3,30}" placeholder="Ex.: aluno07" required>
             <table>
                 <thead>
                     <tr>
